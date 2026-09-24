@@ -3,6 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { TeacherLogin, TeacherLogout } from "@/services/authService";
 
+export const useAuth = () => {
+    let user = null;
+
+    try {
+        user = JSON.parse(localStorage.getItem("teacher_user") || "null");
+    } catch {
+        localStorage.removeItem("teacher_user");
+    }
+
+    return { user };
+};
+
 export const useLogin = () => {
     const navigate = useNavigate();
 

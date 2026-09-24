@@ -1,51 +1,30 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
     LayoutDashboard,
-    Users,
-    FileUp,
-    Logs,
-    RouteOff,
-    FolderSync,
-    ShieldCheck,
-    Activity,
-    UserRoundCog,
-    ChartNoAxesCombined,
-    Settings2,
-    LogOut,
-    Loader2,
-    BellElectric,
     FileText,
     FilePlusCorner,
-    Send 
+    Bell,
+    Send,
 } from "lucide-react";
 
 import { NavMain } from "@/components/layout/sidebar/sidebar-layout/nav-main";
 import {
     Sidebar,
     SidebarContent,
-    SidebarFooter,
-    SidebarHeader,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
     SidebarRail,
 } from '@/components/ui/sidebar';
 
 const navMain = [
-    { title: "Dashboard", url: "#", icon: LayoutDashboard },
+    { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
     {
         title: "Document Requests",
         url: "#",
-        icon: Users,
+        icon: FilePlusCorner,
         items: [
             { title: "Create Request", url: "/create-request" },
-            { title: "My Documents", url: "#" },
         ],
-
     },
-    { title: "Submission", url: "#", icon: FileText },
-    { title: "Document History", url: "#", icon: FileText },
+    { title: "Submission Requests", url: "/submission-requests", icon: Send },
+    { title: "Notifications", url: "/notifications", icon: Bell },
 ];
 
 export function AppSidebar({ ...props }) {
