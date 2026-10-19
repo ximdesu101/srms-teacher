@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { toast } from "sonner";
-import { Loader2, Upload, FileText, CheckCircle, AlertCircle, ArrowLeft } from "lucide-react";
+import { Loader2, Upload, FileText, CheckCircle, AlertCircle, ArrowLeft, Clock3, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -19,6 +19,7 @@ const SubmissionRequestDetail = () => {
     const queryClient = useQueryClient();
     const fileInputRef = useRef(null);
     const [selectedFile, setSelectedFile] = useState(null);
+    const [isDragging, setIsDragging] = useState(false);
 
     const { data, isLoading, isError } = useQuery({
         queryKey: ["teacher-submission-request", id],
@@ -45,6 +46,7 @@ const SubmissionRequestDetail = () => {
         onSuccess: (res) => {
             toast.success(res.message || "Documents submitted successfully.");
             setSelectedFile(null);
+            if (fileInputRef.current) fileInputRef.current.value = "";
             queryClient.invalidateQueries({ queryKey: ["teacher-submission-request", id] });
             queryClient.invalidateQueries({ queryKey: ["teacher-submission-requests"] });
         },
@@ -58,6 +60,7 @@ const SubmissionRequestDetail = () => {
         onSuccess: (res) => {
             toast.success(res.message || "Revised document submitted successfully.");
             setSelectedFile(null);
+            if (fileInputRef.current) fileInputRef.current.value = "";
             queryClient.invalidateQueries({ queryKey: ["teacher-submission-request", id] });
             queryClient.invalidateQueries({ queryKey: ["teacher-submission-requests"] });
         },
@@ -66,9 +69,24 @@ const SubmissionRequestDetail = () => {
         },
     });
 
+    const handleSelectedFile = (file) => {
+        if (!file) return;
+        if (file.size > 10 * 1024 * 1024) {
+            toast.error("Choose a file smaller than 10 MB.");
+            return;
+        }
+        setSelectedFile(file);
+    };
+
     const handleFileChange = (e) => {
-        const file = e.target.files?.[0];
-        if (file) setSelectedFile(file);
+        handleSelectedFile(e.target.files?.[0]);
+        e.target.value = "";
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        setIsDragging(false);
+        handleSelectedFile(e.dataTransfer.files?.[0]);
     };
 
     const handleSubmit = () => {
@@ -158,17 +176,24 @@ const SubmissionRequestDetail = () => {
 
             {/* Revision note */}
             {canResubmit && request.submission?.revision_note && (
-                <Card className="border-amber-300 bg-amber-50">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-base flex items-center gap-2 text-amber-900">
+                <Card className="overflow-hidden border-amber-300 bg-amber-50/70">
+                    <div className="h-1 bg-amber-500" />
+                    <CardHeader className="pb-3">
+                        <CardTitle className="flex items-center gap-2 text-base text-amber-950">
                             <AlertCircle className="h-5 w-5" />
-                            Revision Required
+                            Needs Revision
                         </CardTitle>
+                        <CardDescription className="text-amber-900/80">
+                            Update the document using the administrator&apos;s feedback below.
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-sm text-amber-900">
-                            <strong>Admin&apos;s Note:</strong> {request.submission.revision_note}
-                        </p>
+                        <div className="rounded-md border border-amber-200 bg-white/80 p-4">
+                            <p className="mb-1 text-xs font-semibold uppercase text-amber-800">Administrator&apos;s note</p>
+                            <p className="whitespace-pre-wrap text-sm leading-6 text-amber-950">
+                                {request.submission.revision_note}
+                            </p>
+                        </div>
                     </CardContent>
                 </Card>
             )}
@@ -177,63 +202,60 @@ const SubmissionRequestDetail = () => {
             {request.submission && (
                 <Card>
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-base flex items-center gap-2">
+                        <CardTitle className="flex items-center justify-between gap-3 text-base">
+                            <span className="flex items-center gap-2">
                             {request.submission.status === "Approved" ? (
                                 <CheckCircle className="h-5 w-5 text-green-600" />
+                                ) : request.submission.status === "Revision Required" ? (
+                                    <AlertCircle className="h-5 w-5 text-amber-700" />
                             ) : (
-                                <FileText className="h-5 w-5" />
+                                            <Clock3 className="h-5 w-5 text-sky-700" />
                             )}
-                            Submitted Document
+                                Current document
+                            </span>
+                            <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${request.submission.status === "Approved"
+                                    ? "bg-emerald-100 text-emerald-900"
+                                    : request.submission.status === "Revision Required"
+                                        ? "bg-amber-100 text-amber-900"
+                                        : "bg-sky-100 text-sky-900"
+                                }`}>
+                                {request.submission.status === "Revision Required"
+                                    ? "Needs Revision"
+                                    : ["Submitted", "Under Review", "Resubmitted"].includes(request.submission.status)
+                                        ? "Awaiting Approval"
+                                        : request.submission.status}
+                            </span>
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="text-sm space-y-1">
-                        <p>
-                            <strong>File:</strong>{" "}
+                    <CardContent className="space-y-3 text-sm">
+                        <div className="flex items-center gap-3 rounded-md border p-3">
+                            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-muted">
+                                <FileText className="h-5 w-5 text-muted-foreground" />
+                            </span>
+                            <div className="min-w-0 flex-1">
+                                <p className="truncate font-medium">
                             {request.submission.file_url ? (
                                 <a
                                     href={request.submission.file_url}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="text-blue-600 underline underline-offset-2 hover:text-blue-800"
+                                            className="underline underline-offset-2 hover:text-primary"
                                 >
                                     {request.submission.original_name}
                                 </a>
                             ) : (
                                 request.submission.original_name
                             )}
-                        </p>
-                        <p><strong>Size:</strong> {request.submission.formatted_size}</p>
-                        <p><strong>Status:</strong> {request.submission.status}</p>
-                        <p><strong>Revision count:</strong> {request.submission.revision_count}</p>
-                        {request.submission.submitted_at && (
-                            <p><strong>Submitted:</strong> {format(new Date(request.submission.submitted_at), "MMM d, yyyy h:mm a")}</p>
-                        )}
-                        {request.submission.versions?.length > 0 && (
-                            <div className="mt-3 border-t pt-3">
-                                <p className="mb-1 font-medium">Submission history</p>
-                                <ul className="space-y-1 text-xs text-muted-foreground">
-                                    {request.submission.versions.map((version) => (
-                                        <li key={version.version_number}>
-                                            Version {version.version_number}: {" "}
-                                            {version.file_url ? (
-                                                <a
-                                                    href={version.file_url}
-                                                    target="_blank"
-                                                    rel="noreferrer"
-                                                    className="text-blue-600 underline underline-offset-2 hover:text-blue-800"
-                                                >
-                                                    {version.original_name}
-                                                </a>
-                                            ) : (
-                                                version.original_name
-                                            )}{" "}
-                                            ({version.status})
-                                            {version.revision_note ? ` - ${version.revision_note}` : ""}
-                                        </li>
-                                    ))}
-                                </ul>
+                                </p>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    {request.submission.formatted_size}
+                                    {request.submission.submitted_at && ` · Updated ${format(new Date(request.submission.submitted_at), "MMM d, yyyy h:mm a")}`}
+                                </p>
                             </div>
-                        )}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                            Revision requests: {request.submission.revision_count}
+                        </p>
                     </CardContent>
                 </Card>
             )}
@@ -246,7 +268,9 @@ const SubmissionRequestDetail = () => {
                             {canResubmit ? "Upload Revised Document" : "Submit Document"}
                         </CardTitle>
                         <CardDescription>
-                            Accepted: Excel, PDF, Word, or image files (max 10 MB).
+                            {canResubmit
+                                ? "Your new file will replace the current submission."
+                                : "Choose a file to attach to this request."} Excel, PDF, Word, or image · up to 10 MB.
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -256,23 +280,43 @@ const SubmissionRequestDetail = () => {
                             className="hidden"
                             accept=".xlsx,.xls,.pdf,.jpg,.jpeg,.png,.doc,.docx"
                             onChange={handleFileChange}
+                            disabled={isUploading}
                         />
-                        <div className="flex items-center gap-3">
-                            <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
-                                <Upload className="h-4 w-4 mr-2" />
-                                Choose File
-                            </Button>
-                            {selectedFile && (
-                                <span className="text-sm text-muted-foreground">
-                                    {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
-                                </span>
-                            )}
-                            {selectedFile && (
-                                <Button variant="ghost" size="sm" onClick={() => setSelectedFile(null)}>
-                                    Remove
+                        <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                            onDragLeave={() => setIsDragging(false)}
+                            onDrop={handleDrop}
+                            disabled={isUploading}
+                            className={`flex w-full flex-col items-center justify-center rounded-md border border-dashed px-5 py-8 text-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60 ${isDragging ? "border-primary bg-accent" : "hover:border-muted-foreground/50 hover:bg-muted/40"}`}
+                        >
+                            <span className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                                <Upload className="h-5 w-5 text-muted-foreground" />
+                            </span>
+                            <span className="font-medium">Drop a file here or choose a file</span>
+                            <span className="mt-1 text-xs text-muted-foreground">Excel, PDF, Word, or image · max 10 MB</span>
+                        </button>
+                        {selectedFile && (
+                            <div className="flex items-center gap-3 rounded-md border bg-muted/30 p-3">
+                                <FileText className="h-5 w-5 shrink-0 text-muted-foreground" />
+                                <div className="min-w-0 flex-1">
+                                    <p className="truncate text-sm font-medium">{selectedFile.name}</p>
+                                    <p className="text-xs text-muted-foreground">{(selectedFile.size / 1024).toFixed(1)} KB</p>
+                                </div>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    aria-label="Remove selected file"
+                                    title="Remove selected file"
+                                    disabled={isUploading}
+                                    onClick={() => setSelectedFile(null)}
+                                >
+                                    <X className="h-4 w-4" />
                                 </Button>
-                            )}
-                        </div>
+                            </div>
+                        )}
                         <Button onClick={handleSubmit} disabled={!selectedFile || isUploading}>
                             {isUploading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                             {canResubmit ? "Resubmit Document" : "Submit Document"}

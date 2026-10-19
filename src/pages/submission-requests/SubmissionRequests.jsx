@@ -12,11 +12,21 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GetSubmissionRequests } from "@/services/submissionRequestService";
 
 const statusColor = {
+    "Needs Revision": "bg-amber-100 text-amber-900",
+    "Awaiting Approval": "bg-sky-100 text-sky-900",
+    Approved: "bg-emerald-100 text-emerald-900",
     Requested: "bg-blue-100 text-blue-800",
     Acknowledged: "bg-yellow-100 text-yellow-800",
-    Submitted: "bg-green-100 text-green-800",
     Overdue: "bg-red-100 text-red-800",
     Cancelled: "bg-gray-100 text-gray-800",
+};
+
+const getDisplayStatus = (request) => {
+    const submissionStatus = request.submission?.status;
+    if (submissionStatus === "Revision Required") return "Needs Revision";
+    if (["Submitted", "Under Review", "Resubmitted"].includes(submissionStatus)) return "Awaiting Approval";
+    if (submissionStatus === "Approved") return "Approved";
+    return request.status;
 };
 
 const SubmissionRequests = () => {
@@ -44,11 +54,12 @@ const SubmissionRequests = () => {
                 </CardHeader>
                 <CardContent>
                     <Tabs value={status} onValueChange={(v) => { setStatus(v); setPage(1); }} className="mb-4">
-                        <TabsList>
+                        <TabsList className="h-auto flex-wrap justify-start">
                             <TabsTrigger value="All">All</TabsTrigger>
+                            <TabsTrigger value="Needs Revision">Needs Revision</TabsTrigger>
+                            <TabsTrigger value="Awaiting Approval">Awaiting Approval</TabsTrigger>
                             <TabsTrigger value="Requested">Requested</TabsTrigger>
                             <TabsTrigger value="Acknowledged">Acknowledged</TabsTrigger>
-                            <TabsTrigger value="Submitted">Submitted</TabsTrigger>
                             <TabsTrigger value="Overdue">Overdue</TabsTrigger>
                             <TabsTrigger value="Cancelled">Cancelled</TabsTrigger>
                         </TabsList>
@@ -95,8 +106,8 @@ const SubmissionRequests = () => {
                                                 {r.due_date ? format(new Date(r.due_date), "MMM d, yyyy") : "—"}
                                             </TableCell>
                                             <TableCell>
-                                                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusColor[r.status] || "bg-gray-100"}`}>
-                                                    {r.status}
+                                                <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${statusColor[getDisplayStatus(r)] || "bg-gray-100 text-gray-800"}`}>
+                                                    {getDisplayStatus(r)}
                                                 </span>
                                             </TableCell>
                                             <TableCell className="text-right">

@@ -15,14 +15,7 @@ import {
 
 const navMain = [
     { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-    {
-        title: "Document Requests",
-        url: "#",
-        icon: FilePlusCorner,
-        items: [
-            { title: "Create Request", url: "/create-request" },
-        ],
-    },
+    { title: "Document Requests", url: "/create-request", icon: FilePlusCorner },
     { title: "Submission Requests", url: "/submission-requests", icon: Send },
     { title: "Notifications", url: "/notifications", icon: Bell },
 ];
