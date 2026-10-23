@@ -108,7 +108,7 @@ const Notifications = () => {
                                             {n.title}
                                         </h4>
                                         {n.is_unread && (
-                                            <span className="h-2 w-2 rounded-full bg-primary shrink-0" />
+                                            <span className="h-2 w-2 rounded-full bg-[#3e963f] shrink-0" />
                                         )}
                                     </div>
                                     <p className="text-sm text-muted-foreground mt-0.5">{n.message}</p>
@@ -124,7 +124,7 @@ const Notifications = () => {
                                         {n.data?.link && (
                                             <Link
                                                 to={n.data.link}
-                                                className="text-xs text-primary hover:underline"
+                                                className="text-xs text-[#3e963f] hover:underline"
                                                 onClick={() => n.is_unread && markReadMutation.mutate(n.id)}
                                             >
                                                 View details

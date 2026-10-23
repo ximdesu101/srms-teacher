@@ -48,13 +48,13 @@ const cardMetrics = [
 
 const CardMetrics = () => {
     return (
-        <div className="grid grid-cols-4 auto-rows-min gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 auto-rows-min gap-4">
             {cardMetrics.map((data) => {
                 const Icon = data.icon;
                 return (
                     <Card key={data.id} className="flex-row gap-0 p-4">
-                        <div className={`flex h-15 w-15 items-center justify-center rounded-full ${data.bgColor}`}>
-                            {Icon && <Icon className={`h-8 w-8 ${data.iconColor}`} />}
+                        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${data.bgColor}`}>
+                            {Icon && <Icon className={`h-6 w-6 ${data.iconColor}`} />}
                         </div>
                         <div className="flex-1">
                             <CardHeader className="pb-0">
@@ -63,7 +63,7 @@ const CardMetrics = () => {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <h1 className="text-3xl font-bold tracking-tight">
+                                <h1 className="text-2xl font-bold tracking-tight">
                                     {data.value}
                                 </h1>
                             </CardContent>

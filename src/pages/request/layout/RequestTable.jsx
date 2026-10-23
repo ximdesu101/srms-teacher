@@ -24,6 +24,7 @@ import {
     InputGroupInput,
 } from "@/components/ui/input-group";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import AddRequestForm from "./AddRequestForm";
 
 const initialRequests = [
@@ -57,6 +58,20 @@ const initialRequests = [
     },
 ];
 
+const statusVariant = {
+    "Pending Review": "secondary",
+    Accepted: "default",
+    "Needs Revision": "secondary",
+    Rejected: "destructive",
+};
+
+const statusClassName = {
+    "Pending Review": "bg-blue-100 text-blue-800 hover:bg-blue-100",
+    Accepted: "bg-green-100 text-green-800 hover:bg-green-100",
+    "Needs Revision": "bg-amber-100 text-amber-900 hover:bg-amber-100",
+    Rejected: "bg-red-100 text-red-800 hover:bg-red-100",
+};
+
 const RequestTable = () => {
     const [search, setSearch] = useState("");
 
@@ -71,16 +86,13 @@ const RequestTable = () => {
                     request.requestedBy,
                     request.document,
                     request.status,
-                ].some((value) =>
-                    value.toLowerCase().includes(keyword)
-                )
+                ].some((value) => value.toLowerCase().includes(keyword))
             );
         });
     }, [search]);
 
     return (
         <div className="grid gap-2">
-            {/* Search Input Bar */}
             <div className="flex items-center justify-end gap-4">
                 <Field className="w-full max-w-sm">
                     <InputGroup>
@@ -88,11 +100,8 @@ const RequestTable = () => {
                             id="search"
                             placeholder="Search requests"
                             value={search}
-                            onChange={(event) =>
-                                setSearch(event.target.value)
-                            }
+                            onChange={(event) => setSearch(event.target.value)}
                         />
-
                         <InputGroupAddon>
                             <Search />
                         </InputGroupAddon>
@@ -101,34 +110,16 @@ const RequestTable = () => {
                 <AddRequestForm />
             </div>
 
-            {/* Table */}
             <div className="overflow-hidden rounded-md border">
                 <Table>
                     <TableHeader className="bg-[#4386c2]">
                         <TableRow className="hover:bg-[#4386c2]">
-                            <TableHead className="text-white">
-                                Request ID
-                            </TableHead>
-
-                            <TableHead className="text-white">
-                                Requested By
-                            </TableHead>
-
-                            <TableHead className="text-white">
-                                Document
-                            </TableHead>
-
-                            <TableHead className="text-white">
-                                Date Requested
-                            </TableHead>
-
-                            <TableHead className="text-white">
-                                Status
-                            </TableHead>
-
-                            <TableHead className="text-right text-white">
-                                Actions
-                            </TableHead>
+                            <TableHead className="text-white">Request ID</TableHead>
+                            <TableHead className="text-white">Requested By</TableHead>
+                            <TableHead className="text-white">Document</TableHead>
+                            <TableHead className="text-white">Date Requested</TableHead>
+                            <TableHead className="text-white">Status</TableHead>
+                            <TableHead className="text-right text-white">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
 
@@ -136,26 +127,26 @@ const RequestTable = () => {
                         {filteredRequests.length > 0 ? (
                             filteredRequests.map((request) => (
                                 <TableRow key={request.id}>
-                                    <TableCell>
+                                    <TableCell className="font-medium">
                                         {request.id}
                                     </TableCell>
-
+                                    <TableCell>{request.requestedBy}</TableCell>
+                                    <TableCell>{request.document}</TableCell>
+                                    <TableCell>{request.requestedDate}</TableCell>
                                     <TableCell>
-                                        {request.requestedBy}
+                                        <Badge
+                                            variant={
+                                                statusVariant[request.status] ||
+                                                "secondary"
+                                            }
+                                            className={
+                                                statusClassName[request.status] ||
+                                                ""
+                                            }
+                                        >
+                                            {request.status}
+                                        </Badge>
                                     </TableCell>
-
-                                    <TableCell>
-                                        {request.document}
-                                    </TableCell>
-
-                                    <TableCell>
-                                        {request.requestedDate}
-                                    </TableCell>
-
-                                    <TableCell>
-                                        {request.status}
-                                    </TableCell>
-
                                     <TableCell className="text-right">
                                         <Button
                                             variant="ghost"
@@ -182,45 +173,23 @@ const RequestTable = () => {
 
                 <Separator />
 
-                {/* Pagination */}
                 <div className="flex items-center justify-end px-2 py-2">
                     <div className="flex-1 text-sm text-muted-foreground">
-                        Page 1 of 3
+                        Page 1 of 1
                     </div>
-
-                    <div>
-                        <Pagination>
-                            <PaginationContent>
-                                <PaginationItem>
-                                    <PaginationPrevious
-                                        className="pointer-events-none opacity-50"
-                                    />
-                                </PaginationItem>
-
-                                <PaginationItem>
-                                    <PaginationLink isActive>
-                                        1
-                                    </PaginationLink>
-                                </PaginationItem>
-
-                                <PaginationItem>
-                                    <PaginationLink>
-                                        2
-                                    </PaginationLink>
-                                </PaginationItem>
-
-                                <PaginationItem>
-                                    <PaginationLink>
-                                        3
-                                    </PaginationLink>
-                                </PaginationItem>
-
-                                <PaginationItem>
-                                    <PaginationNext className="cursor-pointer" />
-                                </PaginationItem>
-                            </PaginationContent>
-                        </Pagination>
-                    </div>
+                    <Pagination>
+                        <PaginationContent>
+                            <PaginationItem>
+                                <PaginationPrevious className="pointer-events-none opacity-50" />
+                            </PaginationItem>
+                            <PaginationItem>
+                                <PaginationLink isActive>1</PaginationLink>
+                            </PaginationItem>
+                            <PaginationItem>
+                                <PaginationNext className="pointer-events-none opacity-50" />
+                            </PaginationItem>
+                        </PaginationContent>
+                    </Pagination>
                 </div>
             </div>
         </div>

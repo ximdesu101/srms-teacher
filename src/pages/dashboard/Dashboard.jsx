@@ -4,6 +4,7 @@ import { ArrowRight, AlertCircle, CheckCircle2, Clock3, FileText, Loader2 } from
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { GetSubmissionRequests } from "@/services/submissionRequestService";
 
 const RequestQueue = ({ title, description, icon: Icon, kind, query }) => {
@@ -19,9 +20,12 @@ const RequestQueue = ({ title, description, icon: Icon, kind, query }) => {
                     </CardTitle>
                     <CardDescription>{description}</CardDescription>
                 </div>
-                <span className={`inline-flex min-w-8 justify-center rounded-full px-2.5 py-1 text-sm font-semibold ${kind === "revision" ? "bg-amber-100 text-amber-900" : "bg-sky-100 text-sky-900"}`}>
+                <Badge
+                    variant="secondary"
+                    className={`min-w-8 justify-center text-sm font-semibold ${kind === "revision" ? "bg-amber-100 text-amber-900 hover:bg-amber-100" : "bg-sky-100 text-sky-900 hover:bg-sky-100"}`}
+                >
                     {query.isLoading ? "—" : query.data?.total ?? 0}
-                </span>
+                </Badge>
             </CardHeader>
             <CardContent>
                 {query.isLoading && (

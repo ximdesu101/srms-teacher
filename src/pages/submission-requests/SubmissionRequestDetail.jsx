@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import { Loader2, Upload, FileText, CheckCircle, AlertCircle, ArrowLeft, Clock3, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     GetSubmissionRequest,
@@ -151,7 +152,20 @@ const SubmissionRequestDetail = () => {
                         </div>
                         <div>
                             <p className="text-muted-foreground">Status</p>
-                            <p className="font-medium">{request.status}</p>
+                            <Badge
+                                variant="secondary"
+                                className={
+                                    request.status === "Overdue"
+                                        ? "bg-red-100 text-red-800 hover:bg-red-100"
+                                        : request.status === "Acknowledged"
+                                          ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
+                                          : request.status === "Submitted"
+                                            ? "bg-green-100 text-green-800 hover:bg-green-100"
+                                            : "bg-blue-100 text-blue-800 hover:bg-blue-100"
+                                }
+                            >
+                                {request.status}
+                            </Badge>
                         </div>
                         <div>
                             <p className="text-muted-foreground">Document</p>
